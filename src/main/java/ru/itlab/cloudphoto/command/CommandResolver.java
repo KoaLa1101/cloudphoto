@@ -10,7 +10,7 @@ import picocli.CommandLine.Model.CommandSpec;
  */
 @Component
 @Command(name = "cloudphoto",
-        subcommands = {InitCommand.class, ListCommand.class, UploadCommand.class},description = "base command resolver")
+        subcommands = {InitCommand.class, ListCommand.class, UploadCommand.class, DownloadCommand.class},description = "base command resolver")
 public class CommandResolver {
    @Spec CommandSpec commandSpec; //fixme delete
 

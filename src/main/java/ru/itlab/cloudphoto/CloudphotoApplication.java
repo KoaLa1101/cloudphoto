@@ -33,7 +33,7 @@ public class CloudphotoApplication implements CommandLineRunner {
     @Override
     public void run(String... args) throws Exception {
         System.out.println(Arrays.toString(args));
-        int exitCode =new CommandLine(commandResolver,factory).execute(args);
+        int exitCode = new CommandLine(commandResolver,factory).execute(args);
         // System.out.println(exitCode);
     }
     public static void main(String[] args) {

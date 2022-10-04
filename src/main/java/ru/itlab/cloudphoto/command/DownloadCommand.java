@@ -23,7 +23,7 @@ public class DownloadCommand implements Runnable {
     private String albumName;
     @Getter
     @Setter
-    @CommandLine.Option(names = "--photo", description = "photo name")
+    @CommandLine.Option(names = "--path", description = "photo path")
     private String photosPath;
 
     @Override
