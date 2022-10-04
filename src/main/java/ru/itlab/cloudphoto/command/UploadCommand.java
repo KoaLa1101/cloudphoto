@@ -32,7 +32,7 @@ public class UploadCommand implements Runnable {
     private String albumName;
     @Getter
     @Setter
-    @CommandLine.Option(names = "--path", description = "photo directory")
+    @CommandLine.Option(names = "--path", description = "photo name")
     private String photosPath;
 
     @Override
@@ -74,7 +74,7 @@ public class UploadCommand implements Runnable {
             return mime.contains("/")
                     && mime.split("/")[0].equalsIgnoreCase("image");
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            throw new IllegalStateException(e);
         }
     }
 }

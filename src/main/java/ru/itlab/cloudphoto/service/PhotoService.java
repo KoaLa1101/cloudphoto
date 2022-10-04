@@ -64,4 +64,12 @@ public class PhotoService {
         yandexS3.deleteObjects(new DeleteObjectsRequest(configHelper.getParamFromIniAWSSection("bucketName"))
                 .withKeys(getPhotoKeyListByAlbumName(albumName).toArray(new String[1])));
     }
+
+    public void deletePhotoInAlbum(String albumName,String photoName){
+        String photoKey =getPhotoKeyListByAlbumName(albumName).stream()
+                .filter(photoKeys->photoKeys.equals(albumName+"/"+photoName))
+                .findAny()
+                .orElseThrow(()->new IllegalStateException("photo does not exists"));
+        yandexS3.deleteObject("album-bucket",photoKey);
+    }
 }
