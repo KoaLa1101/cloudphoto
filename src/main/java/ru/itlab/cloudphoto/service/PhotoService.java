@@ -52,7 +52,7 @@ public class PhotoService {
     public void downloadPhotoListByAlbumName(String albumName, File destinationDir) {
         MultipleFileDownload download =
                 transferManager.downloadDirectory(configHelper
-                        .getParamFromIniAWSSection("buketName"), albumName + "/", destinationDir);
+                        .getParamFromIniAWSSection("bucketName"), albumName + "/", destinationDir);
         try {
             download.waitForCompletion();
         } catch (InterruptedException e) {
