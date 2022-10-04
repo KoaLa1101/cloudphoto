@@ -4,7 +4,6 @@ import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.AmazonS3Exception;
 import com.amazonaws.services.s3.model.S3Object;
 import com.amazonaws.services.s3.model.S3ObjectInputStream;
-import com.amazonaws.services.s3.transfer.TransferManager;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Lazy;
@@ -15,7 +14,6 @@ import ru.itlab.cloudphoto.helper.ConfigHelper;
 import ru.itlab.cloudphoto.util.ObjectMapperUtil;
 
 import java.util.HashSet;
-import java.util.function.BiConsumer;
 
 @Slf4j
 @Service
@@ -28,18 +26,12 @@ public class AlbumService {
 
     private final ConfigHelper configHelper;
 
-    private final TransferManager transferManager;
-
-    private BiConsumer<AlbumDtoList, String> removeAlbum = (albums, s) -> albums.getAlbumList().remove(Album.builder().name(s).build());
-
-    private BiConsumer<AlbumDtoList, String> saveAlbum = (albums, s) -> albums.getAlbumList().add(Album.builder().name(s).build());
-
 
     public Album saveAlbum(String name) {
         AlbumDtoList albumDtoList = getAllAlbumsDto();
         Album newAlbum = Album.builder().name(name).build();
-        albumDtoList.getAlbumList().add(newAlbum); //fixme  duplicate code
-        albumDtoList.setAlbumList(new HashSet<>(albumDtoList.getAlbumList()).stream().toList()); //todo optimize code
+        albumDtoList.getAlbumList().add(newAlbum);
+        albumDtoList.setAlbumList(new HashSet<>(albumDtoList.getAlbumList()).stream().toList());
         yandexS3.putObject(configHelper.getParamFromIniAWSSection("bucketName"), "albums.json", objectMapperUtil.writeValueAsString(albumDtoList));
         return newAlbum;
     }

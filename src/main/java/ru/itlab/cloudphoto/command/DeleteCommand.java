@@ -15,7 +15,7 @@ import java.util.Objects;
 @CommandLine.Command(name = "delete", description = "cloudphoto delete command")
 @RequiredArgsConstructor
 @Slf4j
-public class DeleteCommand implements Runnable{
+public class DeleteCommand implements Runnable {
 
     @Getter
     @Setter
@@ -23,18 +23,18 @@ public class DeleteCommand implements Runnable{
     private String albumName;
     @Getter
     @Setter
-    @CommandLine.Option(names = "--path", description = "photo path")
+    @CommandLine.Option(names = "--path", description = "specify the directory, or it will be selected in your home")
     private String photoPath;
 
     private final AlbumService albumService;
     private final PhotoService photoService;
+
     @Override
     public void run() {
-        if(Objects.isNull(photoPath)){
+        if (Objects.isNull(photoPath)) {
             albumService.deleteAlbum(albumName);
-        }
-        else {
-            photoService.deletePhotoInAlbum(albumName,photoPath);
+        } else {
+            photoService.deletePhotoInAlbum(albumName, photoPath);
         }
     }
 }

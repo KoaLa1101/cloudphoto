@@ -14,7 +14,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Component
-@Command(name = "list", description = "cloudphoto list command")
+@Command(name = "list", description = "show all in cloud")
 @RequiredArgsConstructor
 public class ListCommand implements Runnable {
 

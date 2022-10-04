@@ -8,10 +8,10 @@ import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 import com.amazonaws.services.s3.transfer.TransferManager;
 import com.amazonaws.services.s3.transfer.TransferManagerBuilder;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
+import ru.itlab.cloudphoto.helper.ConfigHelper;
 
 @Configuration
 public class AWSConfig {
@@ -19,8 +19,9 @@ public class AWSConfig {
 
   @Lazy
   @Bean
-  public AWSCredentials basicAWSCredentials() {
-    return new BasicAWSCredentials("YCAJEYvFU-0pACjrisRQ2dwjR", "YCMFBxzHR736EU3fNl8Grw-CpZV2qkTPmsnXpO2u");
+  public AWSCredentials basicAWSCredentials(ConfigHelper configHelper) {
+    return new BasicAWSCredentials(configHelper.getParamFromIniAWSSection("accessKey"),
+            configHelper.getParamFromIniAWSSection("secretKey"));
   }
 
   @Lazy

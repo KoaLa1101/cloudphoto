@@ -6,11 +6,12 @@ import picocli.CommandLine;
 import ru.itlab.cloudphoto.service.SiteService;
 
 @Component
-@CommandLine.Command(name = "mksite", description = "cloudphoto mksite command")
+@CommandLine.Command(name = "mksite", description = "create site with all images")
 @RequiredArgsConstructor
-public class MkSiteCommand implements Runnable{
+public class MkSiteCommand implements Runnable {
 
     private final SiteService siteService;
+
     @Override
     public void run() {
         System.out.println(siteService.getAlbumWebsiteUrl());

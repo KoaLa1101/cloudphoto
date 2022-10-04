@@ -2,7 +2,6 @@ package ru.itlab.cloudphoto.service;
 
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.BucketWebsiteConfiguration;
-import com.amazonaws.services.s3.model.RoutingRule;
 import com.amazonaws.services.s3.transfer.TransferManager;
 import freemarker.template.Configuration;
 import freemarker.template.Template;
@@ -12,6 +11,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import ru.itlab.cloudphoto.domain.model.Album;
+import ru.itlab.cloudphoto.helper.ConfigHelper;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -27,23 +27,28 @@ public class SiteService {
     private final TransferManager transferManager;
     private final AmazonS3 yandexS3;
     private final Configuration configuration;
+    private final ConfigHelper configHelper;
 
 
-    public String getAlbumWebsiteUrl(){
-        List<Album> albumList =albumService.getAllAlbumsDto().getAlbumList();
-        File file= generateAlbumSitePage(albumList);
-        log.info("AlbumSitePage filename {}",file.getName());
+
+    private String getBucketName() {
+        return configHelper.getParamFromIniAWSSection("bucketName");
+    }
+
+    public String getAlbumWebsiteUrl() {
+        List<Album> albumList = albumService.getAllAlbumsDto().getAlbumList();
+        File file = generateAlbumSitePage(albumList);
+        log.info("AlbumSitePage filename {}", file.getName());
         File errorPage = generateErrorSitePage();
-        log.info("error page name {}",errorPage.getName());
-        List<File> albumPhotoPageList= generateAlbumContentPageList(albumList); //fixme
+        log.info("error page name {}", errorPage.getName());
+        List<File> albumPhotoPageList = generateAlbumContentPageList(albumList);
         try {
-            log.info("staring uploading");
-
-            transferManager.upload("album-bucket",file.getName(),file).waitForCompletion();  //todo file uploads helper/util
-            transferManager.upload("album-bucket",errorPage.getName(),errorPage).waitForCompletion();
+            log.info("start uploading html");
+            transferManager.upload(getBucketName(), file.getName(), file).waitForCompletion();
+            transferManager.upload(getBucketName(), errorPage.getName(), errorPage).waitForCompletion();
             albumPhotoPageList
-                    .forEach(albumPhotosPage-> transferManager.upload("album-bucket",albumPhotosPage.getName(),albumPhotosPage));
-            log.info("ended uploading");
+                    .forEach(albumPhotosPage -> transferManager.upload(getBucketName(), albumPhotosPage.getName(), albumPhotosPage));
+            log.info("ended uploading html");
         } catch (InterruptedException e) {
             throw new IllegalStateException(e);
         }
@@ -51,20 +56,19 @@ public class SiteService {
 
         BucketWebsiteConfiguration websiteConfiguration = new BucketWebsiteConfiguration();
 
-     //   websiteConfiguration.setErrorDocument(getErrorPage().getName());
         websiteConfiguration.setIndexDocumentSuffix("index.html");
-        yandexS3.setBucketWebsiteConfiguration("album-bucket", websiteConfiguration);
+        yandexS3.setBucketWebsiteConfiguration(getBucketName(), websiteConfiguration);
 
-        return "https://" + "album-bucket" + ".website.yandexcloud.net";
+        return "https://" + getBucketName() + ".website.yandexcloud.net";
 
     }
 
-    private File generateErrorSitePage(){
+    private File generateErrorSitePage() {
 
         try {
-            Template template = configuration.getTemplate("error.ftlh","UTF-8");
+            Template template = configuration.getTemplate("error.ftlh", "UTF-8");
             FileWriter fileWriter = new FileWriter("error.html");
-            template.process(Collections.emptyMap(),fileWriter);
+            template.process(Collections.emptyMap(), fileWriter);
             fileWriter.flush();
             fileWriter.close();
             return new File("error.html");
@@ -74,22 +78,22 @@ public class SiteService {
 
     }
 
-    private List<File> generateAlbumContentPageList( List<Album> albumList){
+    private List<File> generateAlbumContentPageList(List<Album> albumList) {
         List<File> pagesList = new ArrayList<>();
         albumList.forEach(album -> {
             List<String> photoList = photoService.getPhotoKeyListByAlbumName(album.getName());
             try {
-                Template template = configuration.getTemplate("album_photos_page.ftlh","UTF-8");
-                FileWriter fileWriter = new FileWriter("album"+albumList.indexOf(album)+".html");
+                Template template = configuration.getTemplate("album_photos_page.ftlh", "UTF-8");
+                FileWriter fileWriter = new FileWriter("album" + albumList.indexOf(album) + ".html");
 
                 Map<String, Object> input = new HashMap<>();
-                input.put("photo_content",photoList);
-                template.process(input,fileWriter);
+                input.put("photo_content", photoList);
+                template.process(input, fileWriter);
                 fileWriter.flush();
                 fileWriter.close();
-                log.info("almun name {}",album);
+                log.info("album name {}", album);
 
-                pagesList.add(new File("album"+albumList.indexOf(album)+".html"));
+                pagesList.add(new File("album" + albumList.indexOf(album) + ".html"));
             } catch (IOException | TemplateException e) {
                 throw new IllegalStateException(e);
             }
@@ -97,14 +101,14 @@ public class SiteService {
         return pagesList;
     }
 
-    private File generateAlbumSitePage(List<Album> albumList){
+    private File generateAlbumSitePage(List<Album> albumList) {
 
         try {
             Map<String, Object> input = new HashMap<>();
-            input.put("albums",albumList);
-            Template template =configuration.getTemplate("albums_page.ftlh","UTF-8");
+            input.put("albums", albumList);
+            Template template = configuration.getTemplate("albums_page.ftlh", "UTF-8");
             FileWriter fileWriter = new FileWriter("index.html");
-            template.process(input,fileWriter);
+            template.process(input, fileWriter);
             fileWriter.flush();
             fileWriter.close();
             log.info("html done");

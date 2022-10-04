@@ -32,7 +32,7 @@ public class UploadCommand implements Runnable {
     private String albumName;
     @Getter
     @Setter
-    @CommandLine.Option(names = "--path", description = "photo name")
+    @CommandLine.Option(names = "--path", description = "specify the directory, where to get photos from ")
     private String photosPath;
 
     @Override
